@@ -4,10 +4,9 @@ import numpy as np
 from PIL import Image
 import telebot
 import time
+from passwords import TOKEN_TELEGRAM
 
-TOKEN_TELEGRAM = ''
 bot = telebot.TeleBot(TOKEN_TELEGRAM, parse_mode='html')
-
 send_boolean = {}
 
 
