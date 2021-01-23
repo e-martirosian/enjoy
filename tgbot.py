@@ -8,7 +8,7 @@ from threading import Thread
 import sys
 
 
-TOKEN_TELEGRAM = '1520865846:AAE-x1qio7U4n3jx_TIWmD2SxAyYdFQoNC8'
+TOKEN_TELEGRAM = ''
 send_boolean = {}
 bot = telebot.TeleBot(TOKEN_TELEGRAM, parse_mode='html')
 chat_id = None
