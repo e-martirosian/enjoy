@@ -1,37 +1,41 @@
-import pyautogui
-import cv2
-import numpy as np
-from PIL import Image
-import telebot
 import time
 from threading import Thread
-import sys
 
+import cv2
+import numpy as np
+import pyautogui
+import telebot
+from PIL import Image
+from passwords import TOKEN_TELEGRAM
 
-TOKEN_TELEGRAM = ''
 send_boolean = {}
 bot = telebot.TeleBot(TOKEN_TELEGRAM, parse_mode='html')
-chat_id = None
-thread1 = None
+threads = {}
+
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    global chat_id,thread1
-    bot.send_message(message.chat.id, 'Игра началась... '+str(message.chat.id))
+    global threads
     chat_id = str(message.chat.id)
-    thread1 = Thread(target=schedule_loop, args=(bot,))
-    thread1.start()
+    bot.send_message(message.chat.id, 'Игра началась... ' + str(message.chat.id))
+    if chat_id not in threads:
+        send_boolean[chat_id] = True
+        threads[chat_id] = Thread(target=schedule_loop, args=(chat_id,))
+        threads[chat_id].start()
+
 
 @bot.message_handler(commands=['stop'])
 def stop_sending(message):
-    global thread1
+    global threads
     chat_id = str(message.chat.id)
     send_boolean[chat_id] = False
     bot.send_message(message.chat.id, 'Игра закончилась...')
-    thread1.join()
+    if chat_id in threads:
+        threads[chat_id].join()
+        threads.pop(chat_id)
 
-def schedule_loop(bot):
-    global chat_id
+
+def schedule_loop(chat_id):
     while True:
         if chat_id is not None:
             img = pyautogui.screenshot()
@@ -40,15 +44,13 @@ def schedule_loop(bot):
             im = Image.fromarray(frame)
             im.save('test.png')
 
-            if chat_id not in send_boolean:
+            if send_boolean[chat_id]:
                 img = open('test.png', 'rb')
-                bot.send_photo(chat_id, img, timeout = 1000)
+                bot.send_photo(chat_id, img, timeout=1000)
                 img.close()
             else:
                 break
-                bot.stop_bot()
-                sys.exit()
             time.sleep(2)
-            
-bot.polling()
 
+
+bot.polling()
